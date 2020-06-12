@@ -3,6 +3,7 @@ package com.youran.entiy;
 import org.apache.hadoop.mapreduce.JobID;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Data implements Serializable {
     private String jobId;//id

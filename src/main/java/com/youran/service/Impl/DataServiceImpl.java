@@ -31,4 +31,11 @@ public class DataServiceImpl implements DataService {
         DataDao dataDao=new DataDaoImpl();
         dataDao.delData(id);
     }
+
+    @Override
+    public long checkTime(String timestmap) {
+        DataDao dataDao=new DataDaoImpl();
+
+        return dataDao.checkTime(timestmap);
+    }
 }

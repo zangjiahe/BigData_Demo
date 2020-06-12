@@ -58,7 +58,7 @@
                     <div class="buttons-wrap">
 <%--                        <form id="form" action="/BigData_Demo_war_exploded/data?method=start" method="post">--%>
                             <div class="right">
-                                <input type="hidden" name="timestmap" value="javascript: javaex.getTime();">
+                                <input type="hidden" id="timestmap" name="timestmap" value="">
                                 <input type="text" id="inputpath" class="text" placeholder="请输入需要分析的路径" name="input" />
                                 <input type="text" id="outputpath" class="text" placeholder="请输入存放结果的路径" name="out" />
                                 <input type="button" id="save" class="button green empty" onclick="submit()" value="提交计算" />
@@ -76,7 +76,7 @@
                         <th style="text-align: center;">操作</th>
                     </tr>
                     </thead>
-                    <tbody id="tbody" style="text-align: center;line-height: 55px; ">
+                    <tbody id="tbody" style="text-align: center;line-height: 52px; ">
                     </tbody>
                 </table>
             </div>
@@ -99,13 +99,13 @@
             $.each(res.data, function (index, element) {
                 var path="/BigData_Demo_war_exploded/data?method=toResul&out="+element['outputpath']
                 str+="<tr>" +
-                    "<td>" +element['jobid']+"</td>" +
-                    "<td>" +element['jobstatus']+"</td>" +
-                    "<td>" +element['inputpath']+"</td>" +
-                    "<td>" +element['outputpath']+"</td>" +
-                    "<td>" +
-                    "<span class='group-button'>"+
-                    "<a href="+"/BigData_Demo_war_exploded/data?method=toResult&out="+escape(element['outputpath'])+"><button class='button blue'><span class='icon-eye'></span>查看</button></a>"+
+                    "<td style=\"text-align: center;line-height: 52px; \">" +element['jobid']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +element['jobstatus']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +element['inputpath']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +element['outputpath']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +
+                    "<span class='group-button' style='margin-top: 8px'>"+
+                    "<a  href="+"/BigData_Demo_war_exploded/result.jsp?out="+escape(element['outputpath'])+"><button class='button blue'><span class='icon-eye'></span>查看</button></a>"+
                     "<a href="+"/BigData_Demo_war_exploded/data?method=del&jobid="+element['jobid']+"><button class='button red'><span class='icon-close2'></span> 删除</button>"+
                     "<a href="+"/BigData_Demo_war_exploded/data?method=downloadFile&jobid="+element['jobid']+"&path="+escape(element['outputpath'])+"><button class='button green'><span class='icon-cloud_download'></span> 下载</button>"+
                     " </span>"+
@@ -118,7 +118,8 @@
     })
 
     function submit() {
-
+        var time = javaex.getTime();
+        $('#timestmap').val(time)
         javaex.optTip({
             content : "数据提交中，请稍候...",
             type : "submit"
@@ -128,17 +129,25 @@
             type: 'post',
             datatype: 'json',
             data:{
+                timestmap:$('#timestmap').val(),
                 input:$('#inputpath').val(),
                 out:$('#outputpath').val()
             },
             success: function (res) {
+                if (res.status==0){
+                    javaex.optTip({
+                        content : res.time,
+                        type : "error"
+                    });
+                    return;
+                }else{
                 console.log(res)
                 var str="<tr>" +
-                    "<td>" +res['jobid']+"</td>" +
-                    "<td>" +res['jobstatus']+"</td>" +
-                    "<td>" +res['inputpath']+"</td>" +
-                    "<td>" +res['outputpath']+"</td>" +
-                    "<td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +res['jobid']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +res['jobstatus']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +res['inputpath']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +res['outputpath']+"</td>" +
+                    "<td style=\"text-align: center;line-height: 52px; \">" +
                     "<span class='group-button'>"+
                     "<a href="+"/BigData_Demo_war_exploded/result.jsp?out="+escape(res['outputpath'])+"><button class='button blue'><span class='icon-eye'></span>查看</button></a>"+
                     "<a href="+"/BigData_Demo_war_exploded/data?method=del&jobid="+res['jobid']+"><button class='button red'><span class='icon-close2'></span> 删除</button>"+
@@ -148,12 +157,12 @@
                     "</tr>";
                 $('#tbody').append(str);
                 javaex.optTip({
-                    content : "操作成功",
+                    content : "识别成功成功",
                     type : "success"
                 });
 
 
-            }
+            }}
 
         })
     }

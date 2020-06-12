@@ -91,24 +91,30 @@ public class DataControll extends HttpServlet {
     }
 
     private void starmr(HttpServletRequest req, HttpServletResponse resp) throws IOException, ClassNotFoundException, InterruptedException, ServletException {
-        System.out.println(req.getParameter("input") + req.getParameter("out"));
-        startJob(req.getParameter("input"), req.getParameter("out"));
-        Map<String, String> map = getSussessResult(req.getParameter("out"));
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String mapKey = entry.getKey();
-            String mapValue = entry.getValue();
-            System.out.println(mapKey + ":" + mapValue);
-        }
-        JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
-        System.out.println(json);
+        String timeStmap=req.getParameter("timestmap").replace("-","/");
+       DataService dataService=new DataServiceImpl();
+       long time=dataService.checkTime(timeStmap);
+       if (time>30000){
+           System.out.println(req.getParameter("input") + req.getParameter("out"));
+           startJob(req.getParameter("input"), req.getParameter("out"));
+           Map<String, String> map = getSussessResult(req.getParameter("out"));
+           for (Map.Entry<String, String> entry : map.entrySet()) {
+               String mapKey = entry.getKey();
+               String mapValue = entry.getValue();
+               System.out.println(mapKey + ":" + mapValue);
+           }
+           JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
+           System.out.println(json);
+           result.put("status",200);
+       }else {
+           result.put("time","速度太快了，请"+1.0*time/1000+"秒后再试！");
+           result.put("status",0);
+       }
         resp.setContentType("application/json;charset=utf-8");
-        System.out.println("result:"+result);
         resp.getWriter().write(result + "");
-
-//        req.getRequestDispatcher("index.jsp").forward(req, resp);
     }
 
-    //添加数据
+    //删除数据
     private void delData(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         String id = req.getParameter("jobid");
         System.out.println(req.getParameter("jobid"));
@@ -124,9 +130,6 @@ public class DataControll extends HttpServlet {
         System.out.println(getURLDecoderString(req.getParameter("out")));
         Map<String, String> map = getSussessResult(getURLDecoderString(req.getParameter("out")));
 //        JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
-
-
-
         //创建key和value的数组
 
         List<String> key_list=new ArrayList<>();
@@ -137,10 +140,10 @@ public class DataControll extends HttpServlet {
             key_list.add(tmp);
             value_list.add(Integer.parseInt(map.get(tmp)));
         }
-        String[] key=key_list.toArray(new String[key_list.size()]);
-        int[] value=new int[value_list.size()];
-        Integer[] value1=new Integer[value.length];
-        value1=value_list.toArray(new Integer[0]);
+//        String[] key=key_list.toArray(new String[key_list.size()]);
+//        int[] value=new int[value_list.size()];
+//        Integer[] value1=new Integer[value.length];
+//        value1=value_list.toArray(new Integer[0]);
 
 
 
@@ -236,6 +239,7 @@ public class DataControll extends HttpServlet {
         conf.set("mapreduce.cluster.local.dir", "C:/hadoop2.7.2");
         final String in = inputpath;
         final String out = outputpath;
+
         // 实例化一个job
         final Job job = Job.getInstance(conf);
         new Thread(new Runnable() {

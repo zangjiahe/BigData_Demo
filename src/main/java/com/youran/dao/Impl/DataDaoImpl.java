@@ -10,6 +10,8 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.youran.utils.DBCon.MyClose;
@@ -82,5 +84,29 @@ public class DataDaoImpl implements DataDao {
         } finally {
             MyClose(rs, ps, con);
         }
+    }
+    //返回true即可计算 false为不可计算
+    @Override
+    public long checkTime(String timestmap) {
+        long time1=0;
+        try {
+            ps = con.prepareStatement("select * from t_bigdata order by `timestamp` desc LIMIT 1;");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Timestamp time=rs.getTimestamp("timestamp");
+                String strn = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(time);
+//                if (new Date(timestmap).getTime()-new Date(strn).getTime()>1000*30){
+                    time1=new Date(timestmap).getTime()-new Date(strn).getTime();
+//                    System.out.println("qqqqqqqqqqqqqqqqqqqq"+time1);
+//                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            MyClose(rs, ps, con);
+        }
+
+        return time1;
     }
 }
