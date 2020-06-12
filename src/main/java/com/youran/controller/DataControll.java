@@ -4,6 +4,7 @@ package com.youran.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.support.spring.JSONPResponseBodyAdvice;
 import com.jcraft.jsch.MAC;
 import com.sun.deploy.net.URLEncoder;
 import com.youran.entiy.Data;
@@ -26,10 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLDecoder;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @WebServlet(name = "data", urlPatterns = "/data")
 public class DataControll extends HttpServlet {
@@ -121,13 +119,100 @@ public class DataControll extends HttpServlet {
 
     }
 
-    //    根据Id查询
+    //    查询计算结果
     private void toResult(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         System.out.println(getURLDecoderString(req.getParameter("out")));
         Map<String, String> map = getSussessResult(getURLDecoderString(req.getParameter("out")));
-        JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
+//        JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
+
+
+
+        //创建key和value的数组
+
+        List<String> key_list=new ArrayList<>();
+        List<Integer> value_list=new ArrayList<>();
+        Iterator it=map.keySet().iterator();
+        while(it.hasNext()){
+            String tmp=it.next().toString();
+            key_list.add(tmp);
+            value_list.add(Integer.parseInt(map.get(tmp)));
+        }
+        String[] key=key_list.toArray(new String[key_list.size()]);
+        int[] value=new int[value_list.size()];
+        Integer[] value1=new Integer[value.length];
+        value1=value_list.toArray(new Integer[0]);
+
+
+
+
+
+        JSONObject finalJson=new JSONObject();
+        //chart:
+        JSONObject chart=new JSONObject();
+        chart.put("type","column");
+        //credits
+        JSONObject credits=new JSONObject();
+        credits.put("enabled",false);
+        //plotOptions
+        JSONObject plotOptions=new JSONObject();
+        JSONObject plotOptions_column=new JSONObject();
+        plotOptions_column.put("borderWidth",0);
+        plotOptions_column.put("pointPadding",0.2);
+        plotOptions.put("column",plotOptions_column);
+        //series 用来放series  内容 name  data[]
+        JSONArray series = new JSONArray();
+        JSONObject  series_child = new JSONObject ();
+        series_child.put("name","次数");
+////        JSONObject series_data=new JSONObject();
+//        series_child.put("data",value1);
+        series_child.put("name","次数");
+        series_child.put("data",value_list);
+        series.add(series_child);
+
+        //subtitle
+        JSONObject subtitle =new JSONObject();
+        subtitle.put("text","柱状统计图");
+
+        //subtitle
+        JSONObject title =new JSONObject();
+        title.put("text","商品ID购买统计");
+        //tooltip
+        JSONObject tooltip =new JSONObject();
+        tooltip.put("footerFormat","</table>");
+        tooltip.put("headerFormat","<span style=\"font-size:10px\">{point.key}</span><table>");
+        tooltip.put("pointFormat","<tr><td style=\"color:{series.color};padding:0\">{series.name}: </td><td style=\"padding:0\"><b>{point.y:.1f} 件</b></td></tr>");
+        tooltip.put("shared",true);
+        tooltip.put("useHTML",true);
+//        xAxis
+        JSONObject xAxis =new JSONObject();
+        xAxis.put("crosshair",true);
+        xAxis.put("categories",key_list);
+//        yAxis
+        JSONObject yAxis =new JSONObject();
+        yAxis.put("min",0);
+        JSONObject yAxis_title =new JSONObject();
+        yAxis_title.put("text","销售数量(件)");
+        yAxis.put("title",yAxis_title);
+
+
+        //将所有json加入到最终配置中 finalJson
+        finalJson.put("chart",chart);
+        finalJson.put("credits",credits);
+        finalJson.put("plotOptions",plotOptions);
+        finalJson.put("series",series);
+        finalJson.put("subtitle",subtitle);
+        finalJson.put("title",title);
+        finalJson.put("tooltip",tooltip);
+        finalJson.put("xAxis",xAxis);
+        finalJson.put("yAxis",yAxis);
+
         resp.setContentType("application/json;charset=utf-8");
-        resp.getWriter().write(json + "");
+        resp.getWriter().write(finalJson + "");
+
+
+
+
+
 
     }
 

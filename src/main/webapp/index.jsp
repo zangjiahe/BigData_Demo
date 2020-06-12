@@ -8,7 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>大数据课程设计</title>
 
 </head>
 <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
@@ -140,7 +140,7 @@
                     "<td>" +res['outputpath']+"</td>" +
                     "<td>" +
                     "<span class='group-button'>"+
-                    "<a href="+"/BigData_Demo_war_exploded/data?method=toResult&out="+escape(res['outputpath'])+"><button class='button blue'><span class='icon-eye'></span>查看</button></a>"+
+                    "<a href="+"/BigData_Demo_war_exploded/result.jsp?out="+escape(res['outputpath'])+"><button class='button blue'><span class='icon-eye'></span>查看</button></a>"+
                     "<a href="+"/BigData_Demo_war_exploded/data?method=del&jobid="+res['jobid']+"><button class='button red'><span class='icon-close2'></span> 删除</button>"+
                     "<a href="+"/BigData_Demo_war_exploded/data?method=downloadFile&jobid="+res['jobid']+"&path="+escape(res['outputpath'])+"><button class='button green'><span class='icon-cloud_download'></span> 下载</button>"+
                     " </span>"+
