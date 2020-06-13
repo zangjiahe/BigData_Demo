@@ -4,9 +4,6 @@ package com.youran.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.support.spring.JSONPResponseBodyAdvice;
-import com.jcraft.jsch.MAC;
-import com.sun.deploy.net.URLEncoder;
 import com.youran.entiy.Data;
 import com.youran.service.DataService;
 import com.youran.service.Impl.DataServiceImpl;
@@ -26,7 +23,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URLDecoder;
 import java.util.*;
 
 @WebServlet(name = "data", urlPatterns = "/data")
@@ -107,6 +103,7 @@ public class DataControll extends HttpServlet {
            System.out.println(json);
            result.put("status",200);
        }else {
+           time=30000-time;
            result.put("time","速度太快了，请"+1.0*time/1000+"秒后再试！");
            result.put("status",0);
        }
@@ -129,9 +126,7 @@ public class DataControll extends HttpServlet {
     private void toResult(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         System.out.println(getURLDecoderString(req.getParameter("out")));
         Map<String, String> map = getSussessResult(getURLDecoderString(req.getParameter("out")));
-//        JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
         //创建key和value的数组
-
         List<String> key_list=new ArrayList<>();
         List<Integer> value_list=new ArrayList<>();
         Iterator it=map.keySet().iterator();
@@ -140,15 +135,6 @@ public class DataControll extends HttpServlet {
             key_list.add(tmp);
             value_list.add(Integer.parseInt(map.get(tmp)));
         }
-//        String[] key=key_list.toArray(new String[key_list.size()]);
-//        int[] value=new int[value_list.size()];
-//        Integer[] value1=new Integer[value.length];
-//        value1=value_list.toArray(new Integer[0]);
-
-
-
-
-
         JSONObject finalJson=new JSONObject();
         //chart:
         JSONObject chart=new JSONObject();
@@ -166,16 +152,12 @@ public class DataControll extends HttpServlet {
         JSONArray series = new JSONArray();
         JSONObject  series_child = new JSONObject ();
         series_child.put("name","次数");
-////        JSONObject series_data=new JSONObject();
-//        series_child.put("data",value1);
         series_child.put("name","次数");
         series_child.put("data",value_list);
         series.add(series_child);
-
         //subtitle
         JSONObject subtitle =new JSONObject();
         subtitle.put("text","柱状统计图");
-
         //subtitle
         JSONObject title =new JSONObject();
         title.put("text","商品ID购买统计");
@@ -196,8 +178,6 @@ public class DataControll extends HttpServlet {
         JSONObject yAxis_title =new JSONObject();
         yAxis_title.put("text","销售数量(件)");
         yAxis.put("title",yAxis_title);
-
-
         //将所有json加入到最终配置中 finalJson
         finalJson.put("chart",chart);
         finalJson.put("credits",credits);
@@ -208,15 +188,8 @@ public class DataControll extends HttpServlet {
         finalJson.put("tooltip",tooltip);
         finalJson.put("xAxis",xAxis);
         finalJson.put("yAxis",yAxis);
-
         resp.setContentType("application/json;charset=utf-8");
         resp.getWriter().write(finalJson + "");
-
-
-
-
-
-
     }
 
     //    查询所有
@@ -230,7 +203,6 @@ public class DataControll extends HttpServlet {
 
 
     }
-
     public void startJob(final String inputpath, final String outputpath) throws InterruptedException, IOException, ClassNotFoundException {
         // 设置windows中的环境变量
         System.out.println(inputpath + "," + outputpath);
@@ -239,7 +211,6 @@ public class DataControll extends HttpServlet {
         conf.set("mapreduce.cluster.local.dir", "C:/hadoop2.7.2");
         final String in = inputpath;
         final String out = outputpath;
-
         // 实例化一个job
         final Job job = Job.getInstance(conf);
         new Thread(new Runnable() {
@@ -247,11 +218,6 @@ public class DataControll extends HttpServlet {
             public void run() {
                 while (true) {
                     try {
-
-//                        System.out.println(job.getStatus().getJobID());
-//                        System.out.println(job.getStatus().getReduceProgress());
-//                        System.out.println(job.getJobState());
-
                         if (job.getJobState().toString().equals("SUCCEEDED")) {
                             System.out.println("统计结束成功");
                             //插入数据库中，状态为成功，务必要保存出参路径
@@ -278,7 +244,6 @@ public class DataControll extends HttpServlet {
 
                     }
                 }
-
             }
         }).start();
         // 指定本次mr job jar包运行主类
@@ -286,27 +251,22 @@ public class DataControll extends HttpServlet {
         job.setMapperClass(WordCount.TokenizerMapper.class);
         job.setCombinerClass(WordCount.IntSumReducer.class);
         job.setReducerClass(WordCount.IntSumReducer.class);
-
         // 指定本次mr 最终输出的 k v类型
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
         // 设置输入路径和输出路径，都是接受命令行参数
         FileInputFormat.addInputPath(job, new Path(inputpath));
         FileOutputFormat.setOutputPath(job, new Path(outputpath));
-
-//            FileInputFormat.addInputPath(job, new Path(args[0]));
-//            FileOutputFormat.setOutputPath(job, new Path(args[1]));
         // 提交程序
         job.waitForCompletion(true);
     }
 
     public Map<String, String> getSussessResult(String path) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new TreeMap<>();
         String filePath = path + "/part-r-00000";
         File file = new File(filePath);
         BufferedReader reader = null;
         String tempString = null;
-        int line = 1;
         try {
             // 以行为单位读取文件内容，一次读一行
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "GBK"));
@@ -314,8 +274,6 @@ public class DataControll extends HttpServlet {
             while ((tempString = reader.readLine()) != null) {
                 String[] tmp = tempString.split("\t");
                 map.put(tmp[0], tmp[1]);
-//                JSONObject json = JSONObject.parseObject(JSON.toJSONString(map));
-//                jsonRsult.add(json);
             }
             reader.close();
         } catch (FileNotFoundException e) {
@@ -331,8 +289,6 @@ public class DataControll extends HttpServlet {
                 }
             }
         }
-
-
         return map;
     }
 

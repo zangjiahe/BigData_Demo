@@ -99,18 +99,30 @@ public class WordCount {
 			int id = Integer.parseInt(words[0]);
 
 			String keyid = "";
-			if (id > 0 && id <= 10000) {
-				keyid = "0~10000";
-			} else if (id > 10000 && id <= 20000) {
-				keyid = "10001~20000";
-			} else if (id > 20000 && id <= 30000) {
-				keyid = "20001~30000";
-			} else if (id > 30000 && id <= 40000) {
-				keyid = "30001~40000";
-			} else if (id > 40000 && id <= 50000) {
-				keyid = "40001~50000";
-			} else {
-				keyid = "50001~";
+			if (id > 0 && id <= 5000) {
+				keyid = "0~5000";
+			} else if (id > 5001 && id <= 10000) {
+				keyid = "5001~10000";
+			} else if (id > 10001 && id <= 15000) {
+				keyid = "10001~15000";
+			} else if (id > 15001 && id <= 20000) {
+				keyid = "15001~20000";
+			} else if (id > 20001 && id <= 25000) {
+				keyid = "20001~25000";
+			} else if (id > 25001 && id <= 30000) {
+				keyid = "25001~30000";
+			} else if (id > 30000 && id <= 35000) {
+				keyid = "30000~35000";
+			} else if (id > 35001 && id <= 40000) {
+				keyid = "35001~40000";
+			} else if (id > 40001 && id <= 45000) {
+				keyid = "40001~45000";
+			} else if (id > 45001 && id <= 50000) {
+				keyid = "45001~50000";
+			} else if (id > 50001 && id <= 55000) {
+				keyid = "50001~55000";
+			} else{
+				keyid = "55000~";
 			}
 
 			context.write(new Text(keyid), one);

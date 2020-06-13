@@ -43,10 +43,8 @@
                 $('#container').highcharts(res);
             }
     })
-
-
-
     });
+
 </script>
 </body>
 </html>
